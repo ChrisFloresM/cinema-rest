@@ -1,9 +1,9 @@
 package com.cfloresh.springboot.app.cinemarest.service;
 
 import com.cfloresh.springboot.app.cinemarest.config.CinemaProperties;
-import com.cfloresh.springboot.app.cinemarest.model.CinemaRoom;
-import com.cfloresh.springboot.app.cinemarest.model.PurchaseRequest;
-import com.cfloresh.springboot.app.cinemarest.model.Seat;
+import com.cfloresh.springboot.app.cinemarest.exception.PurchaseOutOfBoundException;
+import com.cfloresh.springboot.app.cinemarest.exception.SeatNotAvaiableException;
+import com.cfloresh.springboot.app.cinemarest.model.*;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -26,23 +26,27 @@ public class CinemaService {
                 || request.getColumn() < 1;
     }
 
-    public Optional<Seat> purchaseTicket(PurchaseRequest request) {
-        Optional<Seat> seatOptional = cinemaRoom.getSeats().stream()
-                .filter(seat -> seat.getRow() == request.getRow() && seat.getColumn() == request.getColumn())
-                .findFirst();
+    public Seat reserveSeat(PurchaseRequest request) {
+        Seat reservedSeat = findSeat(request.getRow(), request.getColumn());
 
-        if (seatOptional.isEmpty()) {
-            return Optional.empty();
+        if (reservedSeat.isBooked()) {
+            throw new SeatNotAvaiableException("The ticket has been already purchased!");
         }
 
-        Seat purchasedSeat = seatOptional.get();
+        reservedSeat.setBooked(true);
+        return reservedSeat;
+    }
 
-        if (purchasedSeat.isBooked()) {
-            return Optional.empty();
-        }
+    public void releaseSeat(Ticket ticket) {
+        Seat seat = findSeat(ticket.getRow(), ticket.getColumn());
+        seat.setBooked(false);
+    }
 
-        purchasedSeat.setBooked(true);
-        return Optional.of(purchasedSeat);
+    private Seat findSeat(int row, int column) {
+        return cinemaRoom.getSeats().stream()
+                .filter(s -> s.getRow() == row && s.getColumn() == column)
+                .findFirst().orElseThrow(() -> new PurchaseOutOfBoundException("The number of a row or a " +
+                        "column is out of bounds!"));
     }
 
     public CinemaRoom getCinemaRoom() {

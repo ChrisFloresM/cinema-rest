@@ -1,9 +1,9 @@
-package com.cfloresh.springboot.app.cinemarest.model;
+package com.cfloresh.springboot.app.cinemarest.error;
 
-public class RequestError {
+public class ErrorMessage {
     private String error;
 
-    public RequestError(String error) {
+    public ErrorMessage(String error) {
         this.error = error;
     }
 
