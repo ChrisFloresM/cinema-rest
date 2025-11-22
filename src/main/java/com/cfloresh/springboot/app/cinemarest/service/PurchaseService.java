@@ -11,9 +11,11 @@ import java.util.concurrent.ConcurrentHashMap;
 public class PurchaseService {
     private final Map<String, Purchase> purchases = new ConcurrentHashMap<>();
     private final CinemaService cinemaService;
+    private final StatsService statsService;
 
-    public PurchaseService(CinemaService cinemaService) {
+    public PurchaseService(CinemaService cinemaService, StatsService statsService) {
         this.cinemaService = cinemaService;
+        this.statsService = statsService;
     }
 
     public Purchase purchaseSeat(PurchaseRequest request) {
@@ -23,6 +25,10 @@ public class PurchaseService {
                 reservedSeat.getPrice()));
 
         purchases.put(purchase.getToken(), purchase);
+
+        statsService.increaseIncome(reservedSeat.getPrice());
+        statsService.updateSeats();
+
         return purchase;
     }
 
@@ -35,7 +41,11 @@ public class PurchaseService {
 
         Ticket purchaseTicket = purchase.getTicket();
         cinemaService.releaseSeat(purchaseTicket);
+
         purchases.remove(request.getToken());
+
+        statsService.decreaseIncome(purchaseTicket.getPrice());
+        statsService.updateSeats();
 
         return purchaseTicket;
     }

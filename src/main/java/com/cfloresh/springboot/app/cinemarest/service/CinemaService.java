@@ -49,6 +49,14 @@ public class CinemaService {
                         "column is out of bounds!"));
     }
 
+    public int getAvaiableSeats() {
+        return (int)cinemaRoom.getSeats().stream().filter(seat -> !seat.isBooked()).count();
+    }
+
+    public int getSoldSeats() {
+        return (int)cinemaRoom.getSeats().stream().filter(Seat::isBooked).count();
+    }
+
     public CinemaRoom getCinemaRoom() {
         return this.cinemaRoom;
     }

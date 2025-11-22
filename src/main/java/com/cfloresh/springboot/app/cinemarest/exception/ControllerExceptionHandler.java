@@ -18,4 +18,9 @@ public class ControllerExceptionHandler {
     public ResponseEntity<ErrorMessage> handlePurchaseNotFoundException(PurchaseNotFoundException e) {
         return new ResponseEntity<>(new ErrorMessage(e.getMessage()), HttpStatus.BAD_REQUEST);
     }
+
+    @ExceptionHandler(WrongPasswordException.class)
+    public ResponseEntity<ErrorMessage> handleWrongPasswordException(WrongPasswordException e) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ErrorMessage(e.getMessage()));
+    }
 }
